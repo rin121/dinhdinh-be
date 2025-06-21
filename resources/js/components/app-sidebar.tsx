@@ -13,8 +13,8 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Bánh Kem',
-        href: '/cakes',
+        title: 'Sản Phẩm',
+        href: '/products',
         icon: ChefHat,
     },
     {

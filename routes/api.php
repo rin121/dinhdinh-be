@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\SettingsApiController;
 use App\Http\Controllers\Api\CategoryApiController;
+use App\Http\Controllers\Api\ProductApiController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -32,4 +33,28 @@ Route::prefix('categories')->group(function () {
     // Get all categories
     Route::get('/', [CategoryApiController::class, 'index']);
     Route::get('/active', [CategoryApiController::class, 'active']);
+});
+
+// Products API Routes
+Route::prefix('products')->group(function () {
+    // Get all products with filtering and pagination
+    Route::get('/', [ProductApiController::class, 'index']);
+    
+    // Get featured products
+    Route::get('/featured', [ProductApiController::class, 'featured']);
+    
+    // Get products by badge
+    Route::get('/badge/{badge}', [ProductApiController::class, 'byBadge']);
+    
+    // Get available badges
+    Route::get('/badges', [ProductApiController::class, 'badges']);
+    
+    // Search products
+    Route::get('/search', [ProductApiController::class, 'search']);
+    
+    // Get products by category type
+    Route::get('/category/{categoryType}', [ProductApiController::class, 'byCategory']);
+    
+    // Get specific product by slug
+    Route::get('/{slug}', [ProductApiController::class, 'show']);
 }); 

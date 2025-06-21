@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -19,6 +20,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Category routes
     Route::resource('categories', CategoryController::class);
+    
+    // Product routes
+    Route::resource('products', ProductController::class);
+    Route::patch('products/{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggle-status');
+    Route::post('products/{product}/duplicate', [ProductController::class, 'duplicate'])->name('products.duplicate');
 });
 
 require __DIR__.'/settings.php';
