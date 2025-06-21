@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\CategoryController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -15,6 +16,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Settings routes
     Route::resource('general-settings', SettingsController::class);
+    
+    // Category routes
+    Route::resource('categories', CategoryController::class);
 });
 
 require __DIR__.'/settings.php';

@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\SettingsApiController;
+use App\Http\Controllers\Api\CategoryApiController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -24,4 +25,11 @@ Route::prefix('settings')->group(function () {
     
     // Create or update setting
     Route::post('/', [SettingsApiController::class, 'store']);
+});
+
+// Categories API Routes
+Route::prefix('categories')->group(function () {
+    // Get all categories
+    Route::get('/', [CategoryApiController::class, 'index']);
+    Route::get('/active', [CategoryApiController::class, 'active']);
 }); 
