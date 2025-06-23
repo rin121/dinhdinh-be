@@ -51,8 +51,8 @@ class ProductImage extends BaseModel
         if (filter_var($this->url, FILTER_VALIDATE_URL)) {
             return $this->url;
         }
-        
-        return url('storage/' . $this->path);
+
+        return url('storage/'.$this->path);
     }
 
     /**
@@ -63,7 +63,7 @@ class ProductImage extends BaseModel
         if ($this->width && $this->height) {
             return "{$this->width}x{$this->height}";
         }
-        
+
         return null;
     }
 
@@ -72,7 +72,7 @@ class ProductImage extends BaseModel
      */
     public function getFormattedSizeAttribute(): ?string
     {
-        if (!$this->size) {
+        if (! $this->size) {
             return null;
         }
 
@@ -85,7 +85,7 @@ class ProductImage extends BaseModel
             $unitIndex++;
         }
 
-        return round($size, 2) . ' ' . $units[$unitIndex];
+        return round($size, 2).' '.$units[$unitIndex];
     }
 
     /**

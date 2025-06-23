@@ -3,8 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ProductUpdateRequest extends FormRequest
 {
@@ -32,7 +32,7 @@ class ProductUpdateRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('products', 'slug')->ignore($productId)
+                Rule::unique('products', 'slug')->ignore($productId),
             ],
             'description' => 'required|string|max:500',
             'long_description' => 'nullable|string',
@@ -117,9 +117,9 @@ class ProductUpdateRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         // Auto-generate slug if not provided
-        if (!$this->has('slug') && $this->has('name')) {
+        if (! $this->has('slug') && $this->has('name')) {
             $this->merge([
-                'slug' => Str::slug($this->name)
+                'slug' => Str::slug($this->name),
             ]);
         }
 

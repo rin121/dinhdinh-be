@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendOrderEmails;
 use App\Models\Order;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Validation\Rule;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class OrderApiController extends Controller
 {
@@ -86,6 +87,9 @@ class OrderApiController extends Controller
 
             $order = Order::create($validated);
 
+            // Dispatch job gửi email không đồng bộ
+            SendOrderEmails::dispatch($order);
+
             DB::commit();
 
             return response()->json([
@@ -96,10 +100,10 @@ class OrderApiController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'success' => false,
-                'message' => 'Có lỗi xảy ra khi đặt hàng: ' . $e->getMessage(),
+                'message' => 'Có lỗi xảy ra khi đặt hàng: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -136,7 +140,7 @@ class OrderApiController extends Controller
 
         try {
             // Check if order can be modified
-            if (isset($validated['status']) && !$order->canBeModified() && $order->status !== $validated['status']) {
+            if (isset($validated['status']) && ! $order->canBeModified() && $order->status !== $validated['status']) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Không thể thay đổi đơn hàng này.',
@@ -154,7 +158,7 @@ class OrderApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Có lỗi xảy ra khi cập nhật: ' . $e->getMessage(),
+                'message' => 'Có lỗi xảy ra khi cập nhật: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -164,7 +168,7 @@ class OrderApiController extends Controller
      */
     public function cancel(Order $order): JsonResponse
     {
-        if (!$order->canBeCancelled()) {
+        if (! $order->canBeCancelled()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Không thể hủy đơn hàng này.',
@@ -183,7 +187,7 @@ class OrderApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Có lỗi xảy ra khi hủy đơn hàng: ' . $e->getMessage(),
+                'message' => 'Có lỗi xảy ra khi hủy đơn hàng: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -203,11 +207,11 @@ class OrderApiController extends Controller
             'delivered_orders' => Order::byDateRange($startDate, $endDate)->byStatus(Order::STATUS_DELIVERED)->count(),
             'cancelled_orders' => Order::byDateRange($startDate, $endDate)->byStatus(Order::STATUS_CANCELLED)->count(),
             'total_revenue' => Order::byDateRange($startDate, $endDate)
-                                   ->where('payment_status', Order::PAYMENT_PAID)
-                                   ->sum('total_amount'),
+                ->where('payment_status', Order::PAYMENT_PAID)
+                ->sum('total_amount'),
             'pending_revenue' => Order::byDateRange($startDate, $endDate)
-                                      ->where('payment_status', Order::PAYMENT_PENDING)
-                                      ->sum('total_amount'),
+                ->where('payment_status', Order::PAYMENT_PENDING)
+                ->sum('total_amount'),
         ];
 
         return response()->json([

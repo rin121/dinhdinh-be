@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
@@ -40,7 +40,7 @@ class Category extends Model
     // Accessors
     public function getDisplayNameAttribute(): string
     {
-        return $this->icon ? $this->icon . ' ' . $this->name : $this->name;
+        return $this->icon ? $this->icon.' '.$this->name : $this->name;
     }
 
     // Static methods
@@ -48,7 +48,7 @@ class Category extends Model
     {
         return [
             'birthday' => 'Bánh sinh nhật',
-            'wedding' => 'Bánh cưới', 
+            'wedding' => 'Bánh cưới',
             'chocolate' => 'Bánh chocolate',
             'fruit' => 'Bánh trái cây',
             'special' => 'Bánh đặc biệt',

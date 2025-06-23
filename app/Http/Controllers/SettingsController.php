@@ -14,7 +14,7 @@ class SettingsController extends Controller
     public function index()
     {
         $settings = Setting::orderBy('key')->paginate(10);
-        
+
         return Inertia::render('settings/Index', [
             'settings' => $settings,
         ]);
@@ -46,7 +46,7 @@ class SettingsController extends Controller
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     return redirect()->back()
                         ->withInput()
-                        ->with('error', 'Định dạng JSON không hợp lệ: ' . json_last_error_msg());
+                        ->with('error', 'Định dạng JSON không hợp lệ: '.json_last_error_msg());
                 }
                 $value = $decoded;
             }
@@ -65,7 +65,7 @@ class SettingsController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+                ->with('error', 'Có lỗi xảy ra: '.$e->getMessage());
         }
     }
 
@@ -75,7 +75,7 @@ class SettingsController extends Controller
     public function show(string $id)
     {
         $setting = Setting::findOrFail($id);
-        
+
         return Inertia::render('settings/Show', [
             'setting' => $setting,
         ]);
@@ -87,7 +87,7 @@ class SettingsController extends Controller
     public function edit(string $id)
     {
         $setting = Setting::findOrFail($id);
-        
+
         return Inertia::render('settings/Edit', [
             'setting' => $setting,
         ]);
@@ -100,9 +100,9 @@ class SettingsController extends Controller
     {
         try {
             $setting = Setting::findOrFail($id);
-            
+
             $request->validate([
-                'key' => 'required|string|max:255|unique:settings,key,' . $id,
+                'key' => 'required|string|max:255|unique:settings,key,'.$id,
                 'value' => 'nullable|string',
             ]);
 
@@ -113,7 +113,7 @@ class SettingsController extends Controller
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     return redirect()->back()
                         ->withInput()
-                        ->with('error', 'Định dạng JSON không hợp lệ: ' . json_last_error_msg());
+                        ->with('error', 'Định dạng JSON không hợp lệ: '.json_last_error_msg());
                 }
                 $value = $decoded;
             }
@@ -132,7 +132,7 @@ class SettingsController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+                ->with('error', 'Có lỗi xảy ra: '.$e->getMessage());
         }
     }
 
@@ -150,7 +150,7 @@ class SettingsController extends Controller
                 ->with('success', "Cài đặt '{$settingKey}' đã được xóa thành công!");
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Có lỗi xảy ra khi xóa cài đặt: ' . $e->getMessage());
+                ->with('error', 'Có lỗi xảy ra khi xóa cài đặt: '.$e->getMessage());
         }
     }
 }

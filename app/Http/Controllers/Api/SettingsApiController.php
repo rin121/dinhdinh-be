@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class SettingsApiController extends Controller
 {
@@ -17,11 +17,11 @@ class SettingsApiController extends Controller
         try {
             $setting = Setting::where('key', $key)->first();
 
-            if (!$setting) {
+            if (! $setting) {
                 return response()->json([
                     'success' => false,
                     'message' => "Setting với key '{$key}' không tồn tại",
-                    'data' => null
+                    'data' => null,
                 ], 404);
             }
 
@@ -33,15 +33,15 @@ class SettingsApiController extends Controller
                     'key' => $setting->key,
                     'value' => $setting->value,
                     'created_at' => $setting->created_at,
-                    'updated_at' => $setting->updated_at
-                ]
+                    'updated_at' => $setting->updated_at,
+                ],
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra khi lấy setting',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -71,17 +71,17 @@ class SettingsApiController extends Controller
                         'key' => $setting->key,
                         'value' => $setting->value,
                         'created_at' => $setting->created_at,
-                        'updated_at' => $setting->updated_at
+                        'updated_at' => $setting->updated_at,
                     ];
                 }),
-                'total' => $settings->count()
+                'total' => $settings->count(),
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra khi lấy danh sách settings',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -93,12 +93,12 @@ class SettingsApiController extends Controller
     {
         try {
             $keys = $request->input('keys', []);
-            
+
             if (empty($keys)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Vui lòng cung cấp danh sách keys',
-                    'data' => []
+                    'data' => [],
                 ], 400);
             }
 
@@ -113,14 +113,14 @@ class SettingsApiController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Lấy settings thành công',
-                'data' => $result
+                'data' => $result,
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra khi lấy settings',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -133,7 +133,7 @@ class SettingsApiController extends Controller
         try {
             $request->validate([
                 'key' => 'required|string|max:255',
-                'value' => 'nullable'
+                'value' => 'nullable',
             ]);
 
             $setting = Setting::updateOrCreate(
@@ -149,23 +149,23 @@ class SettingsApiController extends Controller
                     'key' => $setting->key,
                     'value' => $setting->value,
                     'created_at' => $setting->created_at,
-                    'updated_at' => $setting->updated_at
-                ]
+                    'updated_at' => $setting->updated_at,
+                ],
             ], 200);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Dữ liệu không hợp lệ',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra khi lưu setting',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
-} 
+}

@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 abstract class BaseModel extends Model
 {
@@ -28,7 +28,7 @@ abstract class BaseModel extends Model
      */
     public function getTable()
     {
-        return $this->table ?? strtolower(class_basename($this)) . 's';
+        return $this->table ?? strtolower(class_basename($this)).'s';
     }
 
     /**
@@ -52,4 +52,4 @@ abstract class BaseModel extends Model
     {
         return $query->onlyTrashed();
     }
-} 
+}

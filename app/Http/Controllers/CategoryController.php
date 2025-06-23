@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -25,7 +24,7 @@ class CategoryController extends Controller
 
         // Search
         if ($request->has('search') && $request->search) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%'.$request->search.'%');
         }
 
         // Filter by status
@@ -73,7 +72,7 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'icon' => 'nullable|string|max:10',
-            'type' => 'required|string|in:' . implode(',', array_keys(Category::getTypes())),
+            'type' => 'required|string|in:'.implode(',', array_keys(Category::getTypes())),
             'description' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
             'sort_order' => 'integer|min:0',
@@ -81,12 +80,12 @@ class CategoryController extends Controller
 
         try {
             Category::create($validated);
-            
+
             return redirect()->route('categories.index')
                 ->with('success', 'Danh mục đã được tạo thành công!');
         } catch (\Exception $e) {
             return back()->withInput()
-                ->with('error', 'Có lỗi xảy ra khi tạo danh mục: ' . $e->getMessage());
+                ->with('error', 'Có lỗi xảy ra khi tạo danh mục: '.$e->getMessage());
         }
     }
 
@@ -120,7 +119,7 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'icon' => 'nullable|string|max:10',
-            'type' => 'required|string|in:' . implode(',', array_keys(Category::getTypes())),
+            'type' => 'required|string|in:'.implode(',', array_keys(Category::getTypes())),
             'description' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
             'sort_order' => 'integer|min:0',
@@ -128,12 +127,12 @@ class CategoryController extends Controller
 
         try {
             $category->update($validated);
-            
+
             return redirect()->route('categories.index')
                 ->with('success', 'Danh mục đã được cập nhật thành công!');
         } catch (\Exception $e) {
             return back()->withInput()
-                ->with('error', 'Có lỗi xảy ra khi cập nhật danh mục: ' . $e->getMessage());
+                ->with('error', 'Có lỗi xảy ra khi cập nhật danh mục: '.$e->getMessage());
         }
     }
 
@@ -144,12 +143,12 @@ class CategoryController extends Controller
     {
         try {
             $category->delete();
-            
+
             return redirect()->route('categories.index')
                 ->with('success', 'Danh mục đã được xóa thành công!');
         } catch (\Exception $e) {
             return back()
-                ->with('error', 'Có lỗi xảy ra khi xóa danh mục: ' . $e->getMessage());
+                ->with('error', 'Có lỗi xảy ra khi xóa danh mục: '.$e->getMessage());
         }
     }
 }

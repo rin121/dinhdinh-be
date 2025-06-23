@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\ProductImage;
+use Illuminate\Database\Seeder;
 
 class ProductImageSeeder extends Seeder
 {
@@ -55,4 +55,4 @@ class ProductImageSeeder extends Seeder
             'sort_order' => 2,
         ]);
     }
-} 
+}

@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class ProductDetail extends Model
 {
@@ -45,21 +45,21 @@ class ProductDetail extends Model
     // Accessors
     public function getFormattedPriceAttribute(): string
     {
-        return $this->price_display ?: number_format($this->price, 0, ',', '.') . 'đ';
+        return $this->price_display ?: number_format($this->price, 0, ',', '.').'đ';
     }
 
     public function getSizeDisplayAttribute(): string
     {
         $sizeMap = [
             'S' => 'Nhỏ',
-            'M' => 'Vừa', 
+            'M' => 'Vừa',
             'L' => 'Lớn',
             'XL' => 'Rất lớn',
         ];
 
         foreach ($sizeMap as $key => $value) {
             if (str_contains($this->size, $key)) {
-                return $value . ' (' . $this->size . ')';
+                return $value.' ('.$this->size.')';
             }
         }
 

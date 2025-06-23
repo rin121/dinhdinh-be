@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
 use App\Models\Category;
-use Illuminate\Http\Request;
+use App\Models\Product;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ProductApiController extends Controller
@@ -45,19 +45,19 @@ class ProductApiController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
         // Sorting
         $sortBy = $request->get('sort_by', 'sort_order');
         $sortOrder = $request->get('sort_order', 'asc');
-        
+
         if ($sortBy === 'price') {
             // Sort by minimum price
             $query->leftJoin('product_details', 'products.id', '=', 'product_details.product_id')
-                  ->groupBy('products.id')
-                  ->orderBy(DB::raw('MIN(product_details.price)'), $sortOrder);
+                ->groupBy('products.id')
+                ->orderBy(DB::raw('MIN(product_details.price)'), $sortOrder);
         } else {
             $query->orderBy($sortBy, $sortOrder);
         }
@@ -75,7 +75,7 @@ class ProductApiController extends Controller
                 'per_page' => $products->perPage(),
                 'total' => $products->total(),
                 'has_more' => $products->hasMorePages(),
-            ]
+            ],
         ]);
     }
 
@@ -89,16 +89,16 @@ class ProductApiController extends Controller
             ->active()
             ->first();
 
-        if (!$product) {
+        if (! $product) {
             return response()->json([
                 'success' => false,
-                'message' => 'Sản phẩm không tồn tại hoặc đã bị ẩn'
+                'message' => 'Sản phẩm không tồn tại hoặc đã bị ẩn',
             ], 404);
         }
 
         return response()->json([
             'success' => true,
-            'data' => $product
+            'data' => $product,
         ]);
     }
 
@@ -108,11 +108,11 @@ class ProductApiController extends Controller
     public function byCategory(string $categoryType): JsonResponse
     {
         $category = Category::where('type', $categoryType)->active()->first();
-        
-        if (!$category) {
+
+        if (! $category) {
             return response()->json([
                 'success' => false,
-                'message' => 'Danh mục không tồn tại'
+                'message' => 'Danh mục không tồn tại',
             ], 404);
         }
 
@@ -125,7 +125,7 @@ class ProductApiController extends Controller
         return response()->json([
             'success' => true,
             'data' => $products,
-            'category' => $category
+            'category' => $category,
         ]);
     }
 
@@ -143,7 +143,7 @@ class ProductApiController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $products
+            'data' => $products,
         ]);
     }
 
@@ -161,7 +161,7 @@ class ProductApiController extends Controller
         return response()->json([
             'success' => true,
             'data' => $products,
-            'badge' => $badge
+            'badge' => $badge,
         ]);
     }
 
@@ -172,7 +172,7 @@ class ProductApiController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data' => Product::getBadges()
+            'data' => Product::getBadges(),
         ]);
     }
 
@@ -182,11 +182,11 @@ class ProductApiController extends Controller
     public function search(Request $request): JsonResponse
     {
         $query = $request->get('q', '');
-        
+
         if (empty($query)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Vui lòng nhập từ khóa tìm kiếm'
+                'message' => 'Vui lòng nhập từ khóa tìm kiếm',
             ], 400);
         }
 
@@ -194,8 +194,8 @@ class ProductApiController extends Controller
             ->active()
             ->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
-                  ->orWhere('description', 'like', "%{$query}%")
-                  ->orWhere('long_description', 'like', "%{$query}%");
+                    ->orWhere('description', 'like', "%{$query}%")
+                    ->orWhere('long_description', 'like', "%{$query}%");
             })
             ->ordered()
             ->limit(20)
@@ -205,7 +205,7 @@ class ProductApiController extends Controller
             'success' => true,
             'data' => $products,
             'query' => $query,
-            'count' => $products->count()
+            'count' => $products->count(),
         ]);
     }
 }

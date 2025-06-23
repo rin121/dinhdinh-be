@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\OrderRequest;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class OrderRequestApiController extends Controller
@@ -98,7 +98,7 @@ class OrderRequestApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Có lỗi xảy ra khi gửi yêu cầu: ' . $e->getMessage(),
+                'message' => 'Có lỗi xảy ra khi gửi yêu cầu: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -146,7 +146,7 @@ class OrderRequestApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Có lỗi xảy ra khi cập nhật: ' . $e->getMessage(),
+                'message' => 'Có lỗi xảy ra khi cập nhật: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -173,7 +173,7 @@ class OrderRequestApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Có lỗi xảy ra khi phản hồi: ' . $e->getMessage(),
+                'message' => 'Có lỗi xảy ra khi phản hồi: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -195,7 +195,7 @@ class OrderRequestApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Có lỗi xảy ra khi chuyển đổi: ' . $e->getMessage(),
+                'message' => 'Có lỗi xảy ra khi chuyển đổi: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -216,7 +216,7 @@ class OrderRequestApiController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Có lỗi xảy ra khi xóa: ' . $e->getMessage(),
+                'message' => 'Có lỗi xảy ra khi xóa: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -232,31 +232,31 @@ class OrderRequestApiController extends Controller
         $stats = [
             'total_requests' => OrderRequest::whereBetween('created_at', [$startDate, $endDate])->count(),
             'new_requests' => OrderRequest::whereBetween('created_at', [$startDate, $endDate])
-                                         ->byStatus(OrderRequest::STATUS_NEW)->count(),
+                ->byStatus(OrderRequest::STATUS_NEW)->count(),
             'contacted_requests' => OrderRequest::whereBetween('created_at', [$startDate, $endDate])
-                                               ->byStatus(OrderRequest::STATUS_CONTACTED)->count(),
+                ->byStatus(OrderRequest::STATUS_CONTACTED)->count(),
             'converted_requests' => OrderRequest::whereBetween('created_at', [$startDate, $endDate])
-                                               ->byStatus(OrderRequest::STATUS_CONVERTED)->count(),
+                ->byStatus(OrderRequest::STATUS_CONVERTED)->count(),
             'overdue_requests' => OrderRequest::overdue()->count(),
             'by_type' => [
                 'quote' => OrderRequest::whereBetween('created_at', [$startDate, $endDate])
-                                      ->byType(OrderRequest::TYPE_QUOTE)->count(),
+                    ->byType(OrderRequest::TYPE_QUOTE)->count(),
                 'custom_order' => OrderRequest::whereBetween('created_at', [$startDate, $endDate])
-                                             ->byType(OrderRequest::TYPE_CUSTOM_ORDER)->count(),
+                    ->byType(OrderRequest::TYPE_CUSTOM_ORDER)->count(),
                 'consultation' => OrderRequest::whereBetween('created_at', [$startDate, $endDate])
-                                             ->byType(OrderRequest::TYPE_CONSULTATION)->count(),
+                    ->byType(OrderRequest::TYPE_CONSULTATION)->count(),
                 'complaint' => OrderRequest::whereBetween('created_at', [$startDate, $endDate])
-                                          ->byType(OrderRequest::TYPE_COMPLAINT)->count(),
+                    ->byType(OrderRequest::TYPE_COMPLAINT)->count(),
                 'other' => OrderRequest::whereBetween('created_at', [$startDate, $endDate])
-                                      ->byType(OrderRequest::TYPE_OTHER)->count(),
+                    ->byType(OrderRequest::TYPE_OTHER)->count(),
             ],
             'by_urgency' => [
                 'high' => OrderRequest::whereBetween('created_at', [$startDate, $endDate])
-                                     ->byUrgency(OrderRequest::URGENCY_HIGH)->count(),
+                    ->byUrgency(OrderRequest::URGENCY_HIGH)->count(),
                 'medium' => OrderRequest::whereBetween('created_at', [$startDate, $endDate])
-                                       ->byUrgency(OrderRequest::URGENCY_MEDIUM)->count(),
+                    ->byUrgency(OrderRequest::URGENCY_MEDIUM)->count(),
                 'low' => OrderRequest::whereBetween('created_at', [$startDate, $endDate])
-                                    ->byUrgency(OrderRequest::URGENCY_LOW)->count(),
+                    ->byUrgency(OrderRequest::URGENCY_LOW)->count(),
             ],
         ];
 

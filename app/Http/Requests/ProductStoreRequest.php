@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
 class ProductStoreRequest extends FormRequest
@@ -103,9 +102,9 @@ class ProductStoreRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         // Auto-generate slug if not provided
-        if (!$this->has('slug') && $this->has('name')) {
+        if (! $this->has('slug') && $this->has('name')) {
             $this->merge([
-                'slug' => Str::slug($this->name)
+                'slug' => Str::slug($this->name),
             ]);
         }
 

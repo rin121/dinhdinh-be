@@ -4,18 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductStoreRequest;
 use App\Http\Requests\ProductUpdateRequest;
+use App\Models\Allergen;
+use App\Models\Category;
+use App\Models\Ingredient;
 use App\Models\Product;
 use App\Models\ProductDetail;
 use App\Models\ProductImage;
-use App\Models\Ingredient;
-use App\Models\Allergen;
-use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\UploadedFile;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
 use Inertia\Inertia;
 
 class ProductController extends Controller
@@ -46,7 +44,7 @@ class ProductController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -95,7 +93,7 @@ class ProductController extends Controller
             $product = Product::create($request->only([
                 'name', 'slug', 'description', 'long_description',
                 'image', 'badge', 'category_id', 'gallery',
-                'is_active', 'sort_order'
+                'is_active', 'sort_order',
             ]));
 
             // Handle image uploads
@@ -129,9 +127,9 @@ class ProductController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return back()->withErrors([
-                'error' => 'Có lỗi xảy ra khi tạo sản phẩm: ' . $e->getMessage()
+                'error' => 'Có lỗi xảy ra khi tạo sản phẩm: '.$e->getMessage(),
             ])->withInput();
         }
     }
@@ -157,7 +155,7 @@ class ProductController extends Controller
 
         // Clear all session data that might contain old validation errors
         session()->forget(['errors', '_flash', 'laravel_session']);
-        
+
         // Clear validation error bag specifically
         $errors = session()->get('errors');
         if ($errors) {
@@ -175,8 +173,6 @@ class ProductController extends Controller
         ]);
     }
 
-
-
     /**
      * Update the specified resource in storage.
      */
@@ -192,7 +188,7 @@ class ProductController extends Controller
             $product->update($request->only([
                 'name', 'slug', 'description', 'long_description',
                 'image', 'badge', 'category_id', 'gallery',
-                'is_active', 'sort_order'
+                'is_active', 'sort_order',
             ]));
 
             // Handle image updates
@@ -208,7 +204,7 @@ class ProductController extends Controller
 
             // Update ingredients with safe defaults
             $ingredients = $request->ingredients ?? [];
-            if (!empty($ingredients)) {
+            if (! empty($ingredients)) {
                 $this->syncIngredients($product, $ingredients);
             } else {
                 $product->ingredients()->delete();
@@ -216,7 +212,7 @@ class ProductController extends Controller
 
             // Update allergens with safe defaults
             $allergens = $request->allergens ?? [];
-            if (!empty($allergens)) {
+            if (! empty($allergens)) {
                 $this->syncAllergens($product, $allergens);
             } else {
                 $product->allergens()->delete();
@@ -229,9 +225,9 @@ class ProductController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return back()->withErrors([
-                'error' => 'Có lỗi xảy ra khi cập nhật sản phẩm: ' . $e->getMessage()
+                'error' => 'Có lỗi xảy ra khi cập nhật sản phẩm: '.$e->getMessage(),
             ])->withInput();
         }
     }
@@ -248,7 +244,7 @@ class ProductController extends Controller
             $product->images()->delete();
 
             // Delete product directory if empty
-            $productPath = 'public/products/' . $product->id;
+            $productPath = 'public/products/'.$product->id;
             if (Storage::exists($productPath) && count(Storage::files($productPath)) === 0) {
                 Storage::deleteDirectory($productPath);
             }
@@ -263,9 +259,9 @@ class ProductController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return back()->withErrors([
-                'error' => 'Có lỗi xảy ra khi xóa sản phẩm: ' . $e->getMessage()
+                'error' => 'Có lỗi xảy ra khi xóa sản phẩm: '.$e->getMessage(),
             ]);
         }
     }
@@ -276,7 +272,7 @@ class ProductController extends Controller
     private function syncProductDetails(Product $product, array $details)
     {
         $existingIds = collect($details)
-            ->filter(fn($detail) => isset($detail['id']))
+            ->filter(fn ($detail) => isset($detail['id']))
             ->pluck('id')
             ->toArray();
 
@@ -286,10 +282,10 @@ class ProductController extends Controller
         // Update or create details
         foreach ($details as $index => $detailData) {
             // Ensure sort_order has a default value
-            if (!isset($detailData['sort_order'])) {
+            if (! isset($detailData['sort_order'])) {
                 $detailData['sort_order'] = $index;
             }
-            
+
             if (isset($detailData['id'])) {
                 // Update existing - exclude timestamps and id
                 $product->details()->where('id', $detailData['id'])
@@ -307,7 +303,7 @@ class ProductController extends Controller
     private function syncIngredients(Product $product, array $ingredients)
     {
         $existingIds = collect($ingredients)
-            ->filter(fn($ingredient) => isset($ingredient['id']))
+            ->filter(fn ($ingredient) => isset($ingredient['id']))
             ->pluck('id')
             ->toArray();
 
@@ -317,10 +313,10 @@ class ProductController extends Controller
         // Update or create ingredients
         foreach ($ingredients as $index => $ingredientData) {
             // Ensure sort_order has a default value
-            if (!isset($ingredientData['sort_order'])) {
+            if (! isset($ingredientData['sort_order'])) {
                 $ingredientData['sort_order'] = $index;
             }
-            
+
             if (isset($ingredientData['id'])) {
                 // Update existing - exclude timestamps and id
                 $product->ingredients()->where('id', $ingredientData['id'])
@@ -338,7 +334,7 @@ class ProductController extends Controller
     private function syncAllergens(Product $product, array $allergens)
     {
         $existingIds = collect($allergens)
-            ->filter(fn($allergen) => isset($allergen['id']))
+            ->filter(fn ($allergen) => isset($allergen['id']))
             ->pluck('id')
             ->toArray();
 
@@ -348,10 +344,10 @@ class ProductController extends Controller
         // Update or create allergens
         foreach ($allergens as $index => $allergenData) {
             // Ensure sort_order has a default value
-            if (!isset($allergenData['sort_order'])) {
+            if (! isset($allergenData['sort_order'])) {
                 $allergenData['sort_order'] = $index;
             }
-            
+
             if (isset($allergenData['id'])) {
                 // Update existing - exclude timestamps and id
                 $product->allergens()->where('id', $allergenData['id'])
@@ -368,10 +364,10 @@ class ProductController extends Controller
      */
     public function toggleStatus(Product $product)
     {
-        $product->update(['is_active' => !$product->is_active]);
+        $product->update(['is_active' => ! $product->is_active]);
 
         $status = $product->is_active ? 'kích hoạt' : 'vô hiệu hóa';
-        
+
         return back()->with('success', "Sản phẩm đã được {$status}!");
     }
 
@@ -387,8 +383,8 @@ class ProductController extends Controller
 
             // Create new product
             $newProduct = $originalProduct->replicate();
-            $newProduct->name = $originalProduct->name . ' (Copy)';
-            $newProduct->slug = $originalProduct->slug . '-copy-' . time();
+            $newProduct->name = $originalProduct->name.' (Copy)';
+            $newProduct->slug = $originalProduct->slug.'-copy-'.time();
             $newProduct->is_active = false;
             $newProduct->save();
 
@@ -420,9 +416,9 @@ class ProductController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return back()->withErrors([
-                'error' => 'Có lỗi xảy ra khi sao chép sản phẩm: ' . $e->getMessage()
+                'error' => 'Có lỗi xảy ra khi sao chép sản phẩm: '.$e->getMessage(),
             ]);
         }
     }
@@ -434,7 +430,7 @@ class ProductController extends Controller
     {
 
         // Remove deleted images
-        if (!empty($removedImages)) {
+        if (! empty($removedImages)) {
             $product->images()->whereIn('id', $removedImages)->delete();
         }
 
@@ -445,11 +441,11 @@ class ProductController extends Controller
 
             if ($image instanceof UploadedFile) {
                 $sortOrder++;
-                $isPrimary = !$isPrimarySet && $index === 0; // First image is primary if no primary exists
-                
+                $isPrimary = ! $isPrimarySet && $index === 0; // First image is primary if no primary exists
+
                 try {
                     $result = $this->uploadProductImage($product, $image, $isPrimary, $sortOrder);
-                    
+
                     if ($isPrimary) {
                         $isPrimarySet = true;
                     }
@@ -470,11 +466,11 @@ class ProductController extends Controller
 
         // Create unique filename
         $extension = $file->getClientOriginalExtension();
-        $filename = time() . '_' . uniqid() . '.' . $extension;
-        $path = "products/{$product->id}/" . $filename;
+        $filename = time().'_'.uniqid().'.'.$extension;
+        $path = "products/{$product->id}/".$filename;
 
         // Store original file using public disk
-        $file->storeAs('products/' . $product->id, $filename, 'public');
+        $file->storeAs('products/'.$product->id, $filename, 'public');
 
         // Get image dimensions
         $imageInfo = getimagesize($file->getPathname());
@@ -485,7 +481,7 @@ class ProductController extends Controller
         return $product->images()->create([
             'filename' => $file->getClientOriginalName(),
             'path' => $path,
-            'url' => 'products/' . $product->id . '/' . $filename,
+            'url' => 'products/'.$product->id.'/'.$filename,
             'alt_text' => $product->name,
             'size' => $file->getSize(),
             'mime_type' => $file->getMimeType(),
@@ -504,7 +500,7 @@ class ProductController extends Controller
         $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         $maxSize = 5 * 1024 * 1024; // 5MB
 
-        if (!in_array($file->getMimeType(), $allowedMimes)) {
+        if (! in_array($file->getMimeType(), $allowedMimes)) {
             throw new \InvalidArgumentException('Chỉ chấp nhận file ảnh định dạng: JPEG, PNG, WebP, GIF');
         }
 
@@ -521,7 +517,7 @@ class ProductController extends Controller
         // Handle removed images
         if (isset($imageData['removed_images']) && is_array($imageData['removed_images'])) {
             $removedIds = array_filter($imageData['removed_images'], 'is_numeric');
-            if (!empty($removedIds)) {
+            if (! empty($removedIds)) {
                 $product->images()->whereIn('id', $removedIds)->delete();
             }
         }
@@ -530,7 +526,7 @@ class ProductController extends Controller
         if (isset($imageData['new_primary_id']) && is_numeric($imageData['new_primary_id'])) {
             // Reset all images to non-primary
             $product->images()->update(['is_primary' => false]);
-            
+
             // Set the new primary image
             $product->images()
                 ->where('id', $imageData['new_primary_id'])
@@ -552,8 +548,8 @@ class ProductController extends Controller
     private function ensurePrimaryImage(Product $product): void
     {
         $hasPrimary = $product->images()->where('is_primary', true)->exists();
-        
-        if (!$hasPrimary) {
+
+        if (! $hasPrimary) {
             $firstImage = $product->images()->orderBy('sort_order')->first();
             if ($firstImage) {
                 $firstImage->update(['is_primary' => true]);

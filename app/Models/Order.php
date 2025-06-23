@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\BaseModel;
 
 class Order extends BaseModel
 {
@@ -38,20 +37,29 @@ class Order extends BaseModel
 
     // Status constants
     const STATUS_PENDING = 'pending';
+
     const STATUS_CONFIRMED = 'confirmed';
+
     const STATUS_PREPARING = 'preparing';
+
     const STATUS_READY = 'ready';
+
     const STATUS_DELIVERED = 'delivered';
+
     const STATUS_CANCELLED = 'cancelled';
 
     // Payment status constants
     const PAYMENT_PENDING = 'pending';
+
     const PAYMENT_PAID = 'paid';
+
     const PAYMENT_FAILED = 'failed';
 
     // Payment method constants
     const PAYMENT_CASH = 'cash';
+
     const PAYMENT_TRANSFER = 'transfer';
+
     const PAYMENT_CARD = 'card';
 
     /**
@@ -62,8 +70,8 @@ class Order extends BaseModel
         $prefix = 'DH';
         $date = now()->format('ymd');
         $count = self::whereDate('created_at', today())->count() + 1;
-        
-        return $prefix . $date . str_pad($count, 3, '0', STR_PAD_LEFT);
+
+        return $prefix.$date.str_pad($count, 3, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -71,7 +79,7 @@ class Order extends BaseModel
      */
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             self::STATUS_PENDING => 'Chờ xử lý',
             self::STATUS_CONFIRMED => 'Đã xác nhận',
             self::STATUS_PREPARING => 'Đang chuẩn bị',
@@ -87,7 +95,7 @@ class Order extends BaseModel
      */
     public function getPaymentStatusLabelAttribute(): string
     {
-        return match($this->payment_status) {
+        return match ($this->payment_status) {
             self::PAYMENT_PENDING => 'Chưa thanh toán',
             self::PAYMENT_PAID => 'Đã thanh toán',
             self::PAYMENT_FAILED => 'Thanh toán thất bại',
@@ -100,7 +108,7 @@ class Order extends BaseModel
      */
     public function getPaymentMethodLabelAttribute(): string
     {
-        return match($this->payment_method) {
+        return match ($this->payment_method) {
             self::PAYMENT_CASH => 'Tiền mặt',
             self::PAYMENT_TRANSFER => 'Chuyển khoản',
             self::PAYMENT_CARD => 'Thẻ tín dụng',
@@ -153,11 +161,11 @@ class Order extends BaseModel
      */
     public function scopeSearchCustomer($query, $search)
     {
-        return $query->where(function($q) use ($search) {
+        return $query->where(function ($q) use ($search) {
             $q->where('customer_name', 'like', "%{$search}%")
-              ->orWhere('customer_phone', 'like', "%{$search}%")
-              ->orWhere('customer_email', 'like', "%{$search}%")
-              ->orWhere('order_number', 'like', "%{$search}%");
+                ->orWhere('customer_phone', 'like', "%{$search}%")
+                ->orWhere('customer_email', 'like', "%{$search}%")
+                ->orWhere('order_number', 'like', "%{$search}%");
         });
     }
-} 
+}

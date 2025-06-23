@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Builder;
 
 class Product extends Model
 {
@@ -95,11 +95,15 @@ class Product extends Model
     {
         $min = $this->min_price;
         $max = $this->max_price;
-        
-        if (!$min) return 'Liên hệ';
-        if ($min == $max) return number_format($min, 0, ',', '.') . 'đ';
-        
-        return number_format($min, 0, ',', '.') . 'đ - ' . number_format($max, 0, ',', '.') . 'đ';
+
+        if (! $min) {
+            return 'Liên hệ';
+        }
+        if ($min == $max) {
+            return number_format($min, 0, ',', '.').'đ';
+        }
+
+        return number_format($min, 0, ',', '.').'đ - '.number_format($max, 0, ',', '.').'đ';
     }
 
     public function getMainIngredientsAttribute()
@@ -115,6 +119,7 @@ class Product extends Model
     public function getPrimaryImageUrlAttribute(): ?string
     {
         $primaryImage = $this->primaryImage;
+
         return $primaryImage ? $primaryImage->full_url : null;
     }
 
@@ -127,9 +132,9 @@ class Product extends Model
     {
         // Fallback to old image field if no images exist
         if ($this->images->isEmpty() && $this->image) {
-            return asset('storage/' . $this->image);
+            return asset('storage/'.$this->image);
         }
-        
+
         return $this->primary_image_url;
     }
 

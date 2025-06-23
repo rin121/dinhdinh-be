@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
 
 class Allergen extends Model
 {
@@ -77,12 +77,13 @@ class Allergen extends Model
         }
 
         $common = static::getCommonAllergens();
+
         return $common[$this->name]['icon'] ?? '⚠️';
     }
 
     public function getSeverityColorAttribute(): string
     {
-        return match($this->severity) {
+        return match ($this->severity) {
             'mild' => 'text-yellow-600',
             'moderate' => 'text-orange-600',
             'severe' => 'text-red-600',

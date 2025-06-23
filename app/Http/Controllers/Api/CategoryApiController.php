@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class CategoryApiController extends Controller
@@ -25,7 +25,7 @@ class CategoryApiController extends Controller
 
             // Search
             if ($request->has('search') && $request->search) {
-                $query->where('name', 'like', '%' . $request->search . '%');
+                $query->where('name', 'like', '%'.$request->search.'%');
             }
 
             // Filter by status
@@ -117,7 +117,7 @@ class CategoryApiController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'icon' => 'nullable|string|max:10',
-                'type' => 'required|string|in:' . implode(',', array_keys(Category::getTypes())),
+                'type' => 'required|string|in:'.implode(',', array_keys(Category::getTypes())),
                 'description' => 'nullable|string|max:1000',
                 'is_active' => 'boolean',
                 'sort_order' => 'integer|min:0',
@@ -174,7 +174,7 @@ class CategoryApiController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'icon' => 'nullable|string|max:10',
-                'type' => 'required|string|in:' . implode(',', array_keys(Category::getTypes())),
+                'type' => 'required|string|in:'.implode(',', array_keys(Category::getTypes())),
                 'description' => 'nullable|string|max:1000',
                 'is_active' => 'boolean',
                 'sort_order' => 'integer|min:0',
