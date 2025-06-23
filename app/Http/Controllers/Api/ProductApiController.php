@@ -16,7 +16,7 @@ class ProductApiController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Product::with(['category', 'details', 'ingredients', 'allergens']);
+        $query = Product::with(['category', 'details', 'ingredients', 'allergens', 'images', 'primaryImage']);
 
         // Filter by category
         if ($request->filled('category_id')) {
@@ -26,7 +26,7 @@ class ProductApiController extends Controller
         // Filter by category type
         if ($request->filled('category_type')) {
             $query->whereHas('category', function ($q) use ($request) {
-                $q->where('type', $request->category_type);
+                $q->where('id', $request->category_type);
             });
         }
 
@@ -84,7 +84,7 @@ class ProductApiController extends Controller
      */
     public function show(string $slug): JsonResponse
     {
-        $product = Product::with(['category', 'details', 'ingredients', 'allergens'])
+        $product = Product::with(['category', 'details', 'ingredients', 'allergens', 'images', 'primaryImage'])
             ->where('slug', $slug)
             ->active()
             ->first();
@@ -116,7 +116,7 @@ class ProductApiController extends Controller
             ], 404);
         }
 
-        $products = Product::with(['category', 'details', 'ingredients', 'allergens'])
+        $products = Product::with(['category', 'details', 'ingredients', 'allergens', 'images', 'primaryImage'])
             ->where('category_id', $category->id)
             ->active()
             ->ordered()
@@ -134,7 +134,7 @@ class ProductApiController extends Controller
      */
     public function featured(): JsonResponse
     {
-        $products = Product::with(['category', 'details', 'ingredients', 'allergens'])
+        $products = Product::with(['category', 'details', 'ingredients', 'allergens', 'images', 'primaryImage'])
             ->active()
             ->whereIn('badge', ['hot', 'bestseller', 'trending'])
             ->ordered()
@@ -152,7 +152,7 @@ class ProductApiController extends Controller
      */
     public function byBadge(string $badge): JsonResponse
     {
-        $products = Product::with(['category', 'details', 'ingredients', 'allergens'])
+        $products = Product::with(['category', 'details', 'ingredients', 'allergens', 'images', 'primaryImage'])
             ->active()
             ->withBadge($badge)
             ->ordered()
@@ -190,7 +190,7 @@ class ProductApiController extends Controller
             ], 400);
         }
 
-        $products = Product::with(['category', 'details'])
+        $products = Product::with(['category', 'details', 'images', 'primaryImage'])
             ->active()
             ->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")

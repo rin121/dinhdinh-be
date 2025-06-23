@@ -24,7 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Product routes
     Route::resource('products', ProductController::class);
     Route::patch('products/{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggle-status');
-    Route::post('products/{product}/duplicate', [ProductController::class, 'duplicate'])->name('products.duplicate');
+        Route::post('products/{product}/duplicate', [ProductController::class, 'duplicate'])->name('products.duplicate');
 });
 
 require __DIR__.'/settings.php';

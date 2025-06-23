@@ -49,6 +49,16 @@ class Product extends Model
         return $this->hasMany(Allergen::class)->orderBy('sort_order');
     }
 
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class)->ordered();
+    }
+
+    public function primaryImage()
+    {
+        return $this->hasOne(ProductImage::class)->where('is_primary', true);
+    }
+
     // Scopes
     public function scopeActive(Builder $query): Builder
     {
@@ -102,6 +112,27 @@ class Product extends Model
         return $this->details()->where('is_available', true)->get();
     }
 
+    public function getPrimaryImageUrlAttribute(): ?string
+    {
+        $primaryImage = $this->primaryImage;
+        return $primaryImage ? $primaryImage->full_url : null;
+    }
+
+    public function getImageUrlsAttribute(): array
+    {
+        return $this->images->pluck('full_url')->toArray();
+    }
+
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        // Fallback to old image field if no images exist
+        if ($this->images->isEmpty() && $this->image) {
+            return asset('storage/' . $this->image);
+        }
+        
+        return $this->primary_image_url;
+    }
+
     // Static methods
     public static function getBadges(): array
     {
@@ -121,7 +152,7 @@ class Product extends Model
     public static function getActiveWithDetails()
     {
         return static::active()
-            ->with(['category', 'details', 'ingredients', 'allergens'])
+            ->with(['category', 'details', 'ingredients', 'allergens', 'images', 'primaryImage'])
             ->ordered()
             ->get();
     }

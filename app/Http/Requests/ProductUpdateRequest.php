@@ -44,6 +44,14 @@ class ProductUpdateRequest extends FormRequest
             'is_active' => 'boolean',
             'sort_order' => 'integer|min:0',
 
+            // Product images
+            'images' => 'nullable|array|max:10',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:10240', // 10MB max
+            'images_data' => 'nullable|array',
+            'images_data.removed_images' => 'nullable|array',
+            'images_data.removed_images.*' => 'integer|exists:product_images,id',
+            'images_data.new_primary_id' => 'nullable|integer|exists:product_images,id',
+
             // Product details (sizes)
             'details' => 'required|array|min:1',
             'details.*.id' => 'nullable|exists:product_details,id',
@@ -89,6 +97,10 @@ class ProductUpdateRequest extends FormRequest
             'category_id.exists' => 'Danh mục không tồn tại',
             'details.required' => 'Thông tin size/giá là bắt buộc',
             'details.min' => 'Cần ít nhất 1 thông tin size/giá',
+            'images.max' => 'Chỉ được upload tối đa 10 ảnh',
+            'images.*.image' => 'File phải là hình ảnh',
+            'images.*.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg, gif, webp',
+            'images.*.max' => 'Kích thước hình ảnh không được vượt quá 10MB',
             'details.*.size.required' => 'Size là bắt buộc',
             'details.*.price.required' => 'Giá là bắt buộc',
             'details.*.price.numeric' => 'Giá phải là số',

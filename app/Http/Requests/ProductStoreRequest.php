@@ -37,6 +37,10 @@ class ProductStoreRequest extends FormRequest
             'is_active' => 'boolean',
             'sort_order' => 'integer|min:0',
 
+            // Product images
+            'images' => 'nullable|array|max:10',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB max
+
             // Product details (sizes)
             'details' => 'required|array|min:1',
             'details.*.size' => 'required|string|max:100',
@@ -79,6 +83,10 @@ class ProductStoreRequest extends FormRequest
             'category_id.exists' => 'Danh mục không tồn tại',
             'details.required' => 'Thông tin size/giá là bắt buộc',
             'details.min' => 'Cần ít nhất 1 thông tin size/giá',
+            'images.max' => 'Chỉ được upload tối đa 10 ảnh',
+            'images.*.image' => 'File phải là hình ảnh',
+            'images.*.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg, gif, webp',
+            'images.*.max' => 'Kích thước hình ảnh không được vượt quá 5MB',
             'details.*.size.required' => 'Size là bắt buộc',
             'details.*.price.required' => 'Giá là bắt buộc',
             'details.*.price.numeric' => 'Giá phải là số',

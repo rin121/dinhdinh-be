@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import React, { useState, useEffect } from 'react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,6 +33,23 @@ interface Category {
 }
 
 interface Props {
+    product: {
+        id: number;
+        name: string;
+        slug: string;
+        description: string;
+        long_description?: string;
+        image: string;
+        badge?: string;
+        category_id: number;
+        gallery: string[];
+        is_active: boolean;
+        sort_order: number;
+        details: ProductDetail[];
+        ingredients: Ingredient[];
+        allergens: Allergen[];
+        images: any[];
+    };
     categories: Category[];
     badges: Record<string, string>;
     ingredientTypes: Record<string, string>;
@@ -67,63 +84,98 @@ interface Allergen {
     sort_order: number;
 }
 
-export default function Create({ categories, badges, ingredientTypes, allergenSeverities, commonAllergens, sizeOptions }: Props) {
+export default function Edit({ product, categories, badges, ingredientTypes, allergenSeverities, commonAllergens, sizeOptions }: Props) {
+    console.log('🎯 Edit component rendered for product:', product.id);
+    
     const [selectedImages, setSelectedImages] = useState<File[]>([]);
     const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
     
-    const { data, setData, post, processing, errors } = useForm({
-        name: '',
-        slug: '',
-        description: '',
-        long_description: '',
-        image: '🍰',
-        badge: '',
-        category_id: '',
-        gallery: ['🍰'],
-        is_active: true,
-        sort_order: 0,
-        details: [{
-            size: 'S (6-inch)',
-            price: 0,
-            price_display: '',
-            servings: 'Dành cho 4-6 người ăn',
-            description: '',
-            is_available: true,
-            sort_order: 0,
-        }] as ProductDetail[],
-        ingredients: [] as Ingredient[],
-        allergens: [] as Allergen[],
+    const { data, setData, put, processing, errors, clearErrors } = useForm({
+        name: product.name,
+        slug: product.slug,
+        description: product.description,
+        long_description: product.long_description || '',
+        image: product.image,
+        badge: product.badge || '',
+        category_id: product.category_id,
+        gallery: product.gallery,
+        is_active: product.is_active,
+        sort_order: product.sort_order,
+        details: product.details,
+        ingredients: product.ingredients,
+        allergens: product.allergens,
         images: [] as File[],
     });
 
+    // Track if form has valid data to suppress errors
+    const [suppressErrors, setSuppressErrors] = useState(false);
+    
+    // Clear any persisted errors on component mount
+    useEffect(() => {
+        // Debug: Log current state
+        console.log('Product data:', product);
+        console.log('Form data:', data);
+        console.log('Current errors:', errors);
+        
+        // Check if form already has valid data from product
+        const hasValidData = product.name && product.slug && product.description && product.category_id;
+        setSuppressErrors(hasValidData);
+        
+        // Force clear all errors with a delay to ensure component is fully mounted
+        const timer = setTimeout(() => {
+            clearErrors();
+            console.log('Errors cleared');
+        }, 100);
+        
+        return () => clearTimeout(timer);
+    }, [product.id]);
+
     const handleSubmit = (e: React.FormEvent) => {
+        console.log('🚀 handleSubmit called!');
         e.preventDefault();
         
         // Log for debugging BEFORE submit
-        console.log('About to submit:', {
+        console.log('📤 About to submit:', {
             selectedImages: selectedImages.length,
-            images: selectedImages.map(f => ({ name: f.name, size: f.size, type: f.type }))
+            images: selectedImages.map(f => ({ name: f.name, size: f.size, type: f.type })),
+            productId: product.id,
+            route: route('products.update', product.id),
+            formData: data
         });
         
-        // Ensure images are synced with form data first
-        setData('images', selectedImages);
+        // Update form data with selected images and image management data
+        const updatedData = {
+            ...data,
+            images: selectedImages,
+            images_data: {
+                removed_images: removedImageIds,
+                new_primary_id: newPrimaryImageId
+            }
+        };
         
-        // Use a small delay to ensure setData has taken effect
-        setTimeout(() => {
-            // Use Inertia's post with forceFormData for file uploads
-            post(route('products.store'), {
-                forceFormData: true,
-                onSuccess: () => {
-                    // Clear image previews
-                    imagePreviewUrls.forEach(url => URL.revokeObjectURL(url));
-                    setSelectedImages([]);
-                    setImagePreviewUrls([]);
-                },
-                onError: (errors) => {
-                    console.error('Validation errors:', errors);
-                }
-            });
-        }, 50); // Small delay to ensure form data sync
+        console.log('⏰ Calling PUT request...');
+        console.log('📊 Updated data before submit:', updatedData);
+        
+        // Call the real update endpoint directly
+        console.log('🚀 Calling real update endpoint...');
+        router.post(route('products.update', product.id), {
+            ...updatedData,
+            _method: 'PUT'
+        }, {
+            forceFormData: true,
+            onStart: () => console.log('🔄 Request started'),
+            onSuccess: () => {
+                console.log('✅ Product updated successfully!');
+                // Clear image previews
+                imagePreviewUrls.forEach(url => URL.revokeObjectURL(url));
+                setSelectedImages([]);
+                setImagePreviewUrls([]);
+            },
+            onError: (errors: any) => {
+                console.error('❌ Validation errors:', errors);
+            },
+            onFinish: () => console.log('🏁 Request finished')
+        });
     };
 
     // Handle image upload
@@ -134,7 +186,7 @@ export default function Create({ categories, badges, ingredientTypes, allergenSe
         // Validate file types and size
         const validFiles = files.filter(file => {
             const isValidType = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type);
-            const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB
+            const isValidSize = file.size <= 10 * 1024 * 1024; // 2MB (match PHP limit)
             
             if (!isValidType) {
                 alert(`File ${file.name} không đúng định dạng. Chỉ chấp nhận: JPEG, PNG, GIF, WebP`);
@@ -142,7 +194,7 @@ export default function Create({ categories, badges, ingredientTypes, allergenSe
             }
             
             if (!isValidSize) {
-                alert(`File ${file.name} quá lớn. Kích thước tối đa 5MB`);
+                alert(`File ${file.name} quá lớn. Kích thước tối đa 10MB`);
                 return false;
             }
             
@@ -320,6 +372,20 @@ export default function Create({ categories, badges, ingredientTypes, allergenSe
         setData('allergens', data.allergens.filter((_, i) => i !== index));
     };
 
+    // Image management functions for existing images
+    const [removedImageIds, setRemovedImageIds] = useState<number[]>([]);
+    const [newPrimaryImageId, setNewPrimaryImageId] = useState<number | null>(null);
+
+    const removeExistingImage = (imageId: number) => {
+        setRemovedImageIds(prev => [...prev, imageId]);
+        console.log('Marked image for removal:', imageId);
+    };
+
+    const setPrimaryImage = (imageId: number) => {
+        setNewPrimaryImageId(imageId);
+        console.log('Set as primary image:', imageId);
+    };
+
     return (
         <AppLayout
             breadcrumbs={[
@@ -348,8 +414,8 @@ export default function Create({ categories, badges, ingredientTypes, allergenSe
                                 <Package className="w-8 h-8" />
                             </div>
                             <div>
-                                <h1 className="text-3xl font-bold mb-2">Thêm Sản Phẩm Mới</h1>
-                                <p className="text-indigo-100 text-lg">Tạo sản phẩm mới với đầy đủ thông tin chi tiết</p>
+                                <h1 className="text-3xl font-bold mb-2">Chỉnh Sửa Sản Phẩm</h1>
+                                <p className="text-indigo-100 text-lg">Cập nhật thông tin sản phẩm: {product.name}</p>
                             </div>
                         </div>
                     </div>
@@ -383,9 +449,8 @@ export default function Create({ categories, badges, ingredientTypes, allergenSe
                                         onChange={(e) => handleNameChange(e.target.value)}
                                         placeholder="Nhập tên sản phẩm..."
                                         className="w-full px-4 py-3 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-gray-900 dark:text-white"
-                                        required
                                     />
-                                    <InputError message={errors.name} />
+                                    <InputError message={suppressErrors ? '' : errors.name} />
                                 </div>
 
                                 <div className="space-y-2">
@@ -400,7 +465,7 @@ export default function Create({ categories, badges, ingredientTypes, allergenSe
                                         placeholder="ten-san-pham"
                                         className="w-full px-4 py-3 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-gray-900 dark:text-white"
                                     />
-                                    <InputError message={errors.slug} />
+                                    <InputError message={suppressErrors ? '' : errors.slug} />
                                 </div>
                             </div>
 
@@ -416,7 +481,7 @@ export default function Create({ categories, badges, ingredientTypes, allergenSe
                                     rows={3}
                                     className="w-full px-4 py-3 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-gray-900 dark:text-white resize-none"
                                 />
-                                <InputError message={errors.description} />
+                                <InputError message={suppressErrors ? '' : errors.description} />
                             </div>
 
                             <div className="space-y-2">
@@ -466,7 +531,7 @@ export default function Create({ categories, badges, ingredientTypes, allergenSe
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <InputError message={errors.category_id} />
+                                    <InputError message={suppressErrors ? '' : errors.category_id} />
                                 </div>
 
                                 <div className="space-y-2">
@@ -523,27 +588,86 @@ export default function Create({ categories, badges, ingredientTypes, allergenSe
                                     onChange={handleImageUpload}
                                     className="hidden"
                                 />
-                                <label htmlFor="images" className="cursor-pointer">
-                                    <div className="flex flex-col items-center gap-4">
-                                        <div className="p-4 bg-indigo-100 dark:bg-indigo-900/20 rounded-full">
-                                            <Upload className="w-8 h-8 text-indigo-500" />
-                                        </div>
-                                        <div>
-                                            <p className="text-lg font-medium text-gray-900 dark:text-white">Chọn hình ảnh để upload</p>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                                Hỗ trợ JPEG, PNG, GIF, WebP (tối đa 5MB mỗi file)
-                                            </p>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 hover-lift flex items-center gap-2 shadow-lg"
-                                        >
-                                            <Upload className="w-4 h-4" />
-                                            Chọn tệp
-                                        </button>
+                                <div className="flex flex-col items-center gap-4">
+                                    <div className="p-4 bg-indigo-100 dark:bg-indigo-900/20 rounded-full">
+                                        <Upload className="w-8 h-8 text-indigo-500" />
                                     </div>
-                                </label>
+                                    <div>
+                                        <p className="text-lg font-medium text-gray-900 dark:text-white">Chọn hình ảnh để upload</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                            Hỗ trợ JPEG, PNG, GIF, WebP (tối đa 10MB mỗi file)
+                                        </p>
+                                    </div>
+                                    <label
+                                        htmlFor="images"
+                                        className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 hover-lift flex items-center gap-2 shadow-lg cursor-pointer"
+                                    >
+                                        <Upload className="w-4 h-4" />
+                                        Chọn tệp
+                                    </label>
+                                </div>
                             </div>
+
+                            {/* Existing Images */}
+                            {product.images && product.images.length > 0 && (
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                                        Hình ảnh hiện có ({product.images.length})
+                                    </h3>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                        {product.images
+                                            .filter(image => !removedImageIds.includes(image.id))
+                                            .map((image, index) => (
+                                            <div key={image.id} className="relative group">
+                                                <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden">
+                                                    <img
+                                                        src={`/storage/${image.path}`}
+                                                        alt={image.alt_text || `Hình ảnh ${index + 1}`}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeExistingImage(image.id)}
+                                                        className="bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 transition-colors shadow-lg"
+                                                        title="Xóa ảnh"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+                                                    {(newPrimaryImageId === image.id || (newPrimaryImageId === null && image.is_primary)) 
+                                                        ? 'Ảnh chính' 
+                                                        : `Ảnh ${index + 1}`}
+                                                </div>
+                                                <div className="absolute top-2 left-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setPrimaryImage(image.id)}
+                                                        className={`p-1.5 rounded-full transition-colors shadow-lg ${
+                                                            (newPrimaryImageId === image.id || (newPrimaryImageId === null && image.is_primary))
+                                                                ? 'bg-green-500 text-white' 
+                                                                : 'bg-white/80 text-gray-700 hover:bg-white'
+                                                        }`}
+                                                        title={(newPrimaryImageId === image.id || (newPrimaryImageId === null && image.is_primary)) ? 'Ảnh chính' : 'Đặt làm ảnh chính'}
+                                                    >
+                                                        <Eye className="w-3 h-3" />
+                                                    </button>
+                                                </div>
+                                                {removedImageIds.includes(image.id) && (
+                                                    <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center rounded-xl">
+                                                        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded">Sẽ xóa</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        💡 Nhấn vào <Eye className="inline w-4 h-4" /> để đặt làm ảnh chính, hoặc <X className="inline w-4 h-4" /> để xóa ảnh
+                                    </p>
+                                </div>
+                            )}
 
                             {/* Preview Images */}
                             {imagePreviewUrls.length > 0 && (
